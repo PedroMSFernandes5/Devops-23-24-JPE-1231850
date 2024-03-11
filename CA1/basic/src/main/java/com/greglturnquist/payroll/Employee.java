@@ -39,7 +39,7 @@ public class Employee {
     private Employee() {
     }
 
-    public Employee(String firstName, String lastName, String description) {
+    public Employee(String firstName, String lastName, String description, int jobYears, String email) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.description = description;
