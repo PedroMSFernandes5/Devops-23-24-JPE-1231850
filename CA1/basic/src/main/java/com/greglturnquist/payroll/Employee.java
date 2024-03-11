@@ -55,7 +55,8 @@ public class Employee {
         return Objects.equals(id, employee.id) &&
                 Objects.equals(firstName, employee.firstName) &&
                 Objects.equals(lastName, employee.lastName) &&
-                Objects.equals(description, employee.description) && Objects.equals(jobYears, employee.jobYears);
+                Objects.equals(description, employee.description) &&
+                Objects.equals(jobYears, employee.jobYears) &&
                 Objects.equals(email, employee.email);
     }
 
