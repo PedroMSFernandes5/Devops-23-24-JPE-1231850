@@ -56,7 +56,7 @@ public class Employee {
                 Objects.equals(firstName, employee.firstName) &&
                 Objects.equals(lastName, employee.lastName) &&
                 Objects.equals(description, employee.description) && Objects.equals(jobYears, employee.jobYears);
-        Objects.equals(email, employee.email);
+                Objects.equals(email, employee.email);
     }
 
     @Override
@@ -108,7 +108,7 @@ public class Employee {
         return jobYears;
     }
 
-    public void setJobYears(String jobYears) {
+    public void setJobYears(int jobYears) {
         this.jobYears = jobYears;
     }
 
@@ -128,7 +128,7 @@ public class Employee {
                 ", firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
                 ", description='" + description + '\'' +
-                ", email='" + email + '\'' +
+                ", email='" + email + '\'' + ", jobYears='" + jobYears + '\'' +
                 '}';
     }
 }
