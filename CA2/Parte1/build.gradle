@@ -78,4 +78,13 @@ task copySource(type: Copy){
     into 'backup'
 }
 
+task zip(type: Zip){
+    group = "DevOps"
+    description = "Zips the source files"
+
+    from 'src/'
+    archiveFileName = 'source.zip'
+    getArchiveFile().set(layout.buildDirectory.file('backup/source.zip'))
+}
+
 
