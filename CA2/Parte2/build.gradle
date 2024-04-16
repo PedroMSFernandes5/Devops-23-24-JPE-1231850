@@ -35,3 +35,18 @@ dependencies {
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
+task copyJar(type: Copy) {
+	dependsOn build
+
+	from "$buildDir/libs"
+	into "$projectDir/dist"
+
+	include "*.jar"
+}
+
+task cleanBuiltFiles(type: Delete) {
+	delete fileTree(dir: 'src/main/resources/static/built', include: '**/*')
+}
+
+clean.dependsOn(cleanBuiltFiles)
