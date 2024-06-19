@@ -11,14 +11,14 @@ The following report is a technical document that provides a detailed account of
 1. intall jenkins from the .war file with the following command:
     
 ```bash
-  java -jar jenkins.war --httpPort=9090
+  java -jar jenkins.war --httpPort=8070
 ```
-2. Access the jenkins at http://localhost:9090
+2. Access the jenkins at http://localhost:8070
 3. Configure account and password
 4. Install the suggested plugins
 5. The gradlew file could need to be updated. If the pipeline breaks with a not recognizing "chmod +x ./gradlew" error, the following command must be run:
 ```bash
-./gradlew wrapper --gradle-version 8.6
+./gradlew wrapper --gradle-version 8.7
 ```
 This could apply to both exercises.
 
@@ -28,37 +28,54 @@ This could apply to both exercises.
 
 ```bash
 pipeline {
-agent any
-stages {
-    stage('Checkout') {
+    agent any
+
+    environment {
+        REPO_URL = 'https://github.com/PedroMSFernandes5/Devops-23-24-JPE-1231850.git'
+        BRANCH = 'main'
+        
+    }
+
+    stages {
+        stage('Checkout') {
             steps {
-                echo 'Checking out the code from the repository'
-                git branch: 'main', url: 'https://github.com/pedroMSFernandes5/devops-23-24-JPE-1231850.git'
-            }
-        }
-    stage('Assemble') {
-            steps {
-                echo 'Assembling...'
-                dir('CA2/part1/gradle_basic_demo') {
-                     sh 'chmod +x ./gradlew'
-                     sh './gradlew clean assemble'
+                echo 'Checking out the code...'
+                script {
+                    try {
+                        git url: "${REPO_URL}", branch: "${BRANCH}", credentialsId: '1aa58b76-6160-478a-a285-ddf1b2b9fdaf'
+                        echo "Checked out branch ${BRANCH} from ${REPO_URL}"
+                    } catch (Exception e) {
+                        echo "Failed to checkout branch ${BRANCH} from ${REPO_URL}"
+                        throw e
+                    }
                 }
             }
         }
-    stage('Test') {
+
+        stage('Assemble') {
             steps {
-                echo 'Testing...'
-                dir('CA2/part1/gradle_basic_demo') {
-                    sh './gradlew test'
+                dir('CA2/Parte1') {
+                    echo 'Assembling the application...'
+                    bat 'gradlew.bat assemble'
+                }
+            }
+        }
+
+        stage('Test') {
+            steps {
+                dir('CA2/Parte1') {
+                    echo 'Running unit tests...'
+                    bat 'gradlew.bat test'
                     junit 'build/test-results/test/*.xml'
                 }
             }
         }
-    stage('Archive') {
+
+        stage('Archive') {
             steps {
-                echo 'Archiving...'
-                dir('CA2/part1/gradle_basic_demo') {
-                    archiveArtifacts 'build/libs/*.jar'
+                dir('CA2/Parte1') {
+                    echo 'Archiving artifacts...'
+                    archiveArtifacts artifacts: 'build/libs/*.jar', fingerprint: true
                 }
             }
         }
@@ -69,7 +86,7 @@ Commit the Jenkinsfile to the repository.
 
 2. Create a new item in jenkins with the following steps:
     - Click on "New Item"
-    - Enter the item name (ca2-part1 for the example)
+    - Enter the item name (ca2-Parte1 for the example)
     - Select "Pipeline" and click "OK"
     - In the "Pipeline" section, select "Pipeline script from SCM"
     - Choose Git as the SCM
@@ -100,60 +117,49 @@ To do this go to "Manage Jenkins" -> "Manage Plugins" -> "Available" and search 
     - Enter an ID for the credentials (e.g., docker-hub-credentials)
     - Click "OK"
 
-3. Create at the CA2-part2 folder a file named Jenkinsfile, to perform the steps of the exercise, with the following content:
+3. Create at the CA2-Parte2 folder a file named Jenkinsfile, to perform the steps of the exercise, with the following content:
 
 ```bash
 pipeline {
     agent any
 
     environment {
-        DOCKER_CREDENTIALS_ID = 'docker-hub-credentials'
-        DOCKER_IMAGE = '1231850/ca2-part2-jenkins'
+        DOCKER_CREDENTIALS_ID = 'a0c2e33a-5a64-42a4-b24e-caa9062e1b1b'
+        DOCKER_IMAGE = 'pedro2255/springbootapp'
         DOCKER_TAG = "${env.BUILD_ID}"
     }
 
     stages {
         stage('Checkout') {
-             steps {
-                 echo 'Checking out code from the repository'
-                 git branch: 'main', url: 'https://github.com/simao-campos87/devops-23-24-JPE-1231850.git'
-               }
-        }
-
-        stage('Set Permissions') {
             steps {
-                dir('ca2/part2/react-and-spring-data-rest-basic') {
-                    echo 'Setting executable permissions on gradlew...'
-                    sh 'chmod +x gradlew'
-                }
+                echo 'Checking out the code...'
+                git branch: 'main', url: 'https://github.com/PedroMSFernandes5/Devops-23-24-JPE-1231850'
             }
         }
 
         stage('Assemble') {
             steps {
-                retry(3) {
-                    dir('ca2/part2/react-and-spring-data-rest-basic') {
-                        echo 'Assembling the application...'
-                        sh './gradlew assemble'
-                    }
+                dir('CA2/Parte2/') {
+                    echo 'Assembling the application...'
+                    bat 'gradlew.bat assemble'
                 }
             }
         }
 
         stage('Test') {
             steps {
-                dir('ca2/part2/react-and-spring-data-rest-basic') {
+                dir('CA2/Parte2/') {
                     echo 'Running unit tests...'
-                    sh './gradlew test'
+                    bat 'gradlew.bat test'
                 }
             }
         }
 
         stage('Javadoc') {
             steps {
-                dir('ca2/part2/react-and-spring-data-rest-basic') {
+                dir('CA2/Parte2/') {
                     echo 'Generating Javadoc...'
-                    sh './gradlew javadoc'
+                    bat 'gradlew.bat javadoc'
                     publishHTML(target: [
                         allowMissing: false,
                         alwaysLinkToLastBuild: false,
@@ -168,7 +174,7 @@ pipeline {
 
         stage('Archive') {
             steps {
-                dir('ca2/part2/react-and-spring-data-rest-basic') {
+                dir('CA2/Parte2/') {
                     echo 'Archiving artifacts...'
                     archiveArtifacts artifacts: 'build/libs/*.jar', fingerprint: true
                 }
@@ -177,10 +183,10 @@ pipeline {
 
         stage('Create Dockerfile') {
             steps {
-                dir('ca2/part2/react-and-spring-data-rest-basic') {
+                dir('CA2/Parte2/') {
                     script {
                         def dockerfileContent = """
-                        FROM gradle:jdk21
+                        FROM openjdk:11-jre-slim
                         WORKDIR /app
                         COPY build/libs/*.jar app.jar
                         EXPOSE 8080
@@ -196,8 +202,8 @@ pipeline {
             steps {
                 script {
                     echo 'Building and publishing Docker image...'
-                    docker.withRegistry('https://index.docker.io/v1/', "${DOCKER_CREDENTIALS_ID}") {
-                        dir('ca2/part2/react-and-spring-data-rest-basic') {
+                    docker.withRegistry('https://registry.hub.docker.com/', "${DOCKER_CREDENTIALS_ID}") {
+                        dir('CA2/Parte2/') {
                             def customImage = docker.build("${DOCKER_IMAGE}:${DOCKER_TAG}")
                             customImage.push()
                             customImage.push('latest')
@@ -206,17 +212,9 @@ pipeline {
                 }
             }
         }
-
-        stage('Run Container') {
-            steps {
-                script {
-                    echo 'Running Docker container...'
-                    sh "docker run -d -p 8080:8080 ${DOCKER_IMAGE}:latest"
-                }
-            }
-        }
     }
 }
+
 ```
 
 Commit the Jenkinsfile to the repository.
